@@ -766,6 +766,8 @@ restart-wireguard
         rm -rf /etc/unbound
         rm -rf /etc/qrencode
         rm /etc/sysctl.d/wireguard.conf
+        rm /etc/wireguard/wg0.conf
+        rm /etc/unbound/unbound.conf
         rm /etc/ntp.conf
         rm /etc/iptables/rules.v4
         rm /etc/firewalld/firewalld.conf
