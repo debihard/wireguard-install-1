@@ -53,15 +53,15 @@ virt-check
 function detect-ipv4() {
   ## Detect IPV4
   if type ping > /dev/null 2>&1; then
-		PING="ping -c3 google.com > /dev/null 2>&1"
-	else
-		PING6="ping -4 -c3 google.com > /dev/null 2>&1"
-	fi
-	if eval "$PING"; then
-		IPV4_SUGGESTION="y"
-	else
-		IPV4_SUGGESTION="n"
-	fi
+  PING="ping -c3 google.com > /dev/null 2>&1"
+  else
+  PING6="ping -4 -c3 google.com > /dev/null 2>&1"
+  fi
+  if eval "$PING"; then
+  IPV4_SUGGESTION="y"
+  else
+  IPV4_SUGGESTION="n"
+  fi
 }
 
 ## Decect IPV4
@@ -115,7 +115,7 @@ function test-connectivity-v6() {
 
   ## Get IPV6
   test-connectivity-v6
-  
+
   ## Determine host port
   function set-port() {
     echo "What port do you want WireGuard server to listen to?"
@@ -338,6 +338,7 @@ function test-connectivity-v6() {
     PRIVATE_SUBNET_V6=${PRIVATE_SUBNET_V6:-"fd42:42:42::0/64"}
     PRIVATE_SUBNET_MASK_V6=$( echo "$PRIVATE_SUBNET_V6" | cut -d "/" -f 2 )
     GATEWAY_ADDRESS_V6="${PRIVATE_SUBNET_V6::-4}1"
+fi
 }
 
   ## Running WireGuard COnfig
@@ -691,7 +692,7 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
 }
   ## Setting Up Wireguard Config
   wireguard-setconf
-  
+
   ## Restart WireGuard
   function restart-wireguard(){
       if pgrep systemd-journal; then
@@ -835,4 +836,5 @@ restart-wireguard
         rm /etc/default/haveged
         ## Echo Uninstall Message
   echo "Wireguard successfully uninstalled"
+fi
 }
