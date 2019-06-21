@@ -50,18 +50,72 @@ dist-check
 ## Virtualization Check
 virt-check
 
-function get-ip() {
-  ## Test outward facing IPV4
-    SERVER_HOST_V4=$(wget -qO- -t1 -T2 ipv4.icanhazip.com)
-    read -rp "System public IPV4 address is $SERVER_HOST_V4. Is that correct? (y/n): " -e -i y SERVER_HOST_V4
-  ## Test outward facing IPV6
-    SERVER_HOST_V6=$(wget -qO- -t1 -T2 ipv6.icanhazip.com)
-    read -rp "System public IPV6 address is $SERVER_HOST_V6. Is that correct? (y/n): " -e -i y SERVER_HOST_V6
+function detect-ipv4() {
+  ## Detect IPV4
+  if type ping > /dev/null 2>&1; then
+		PING="ping -c3 google.com > /dev/null 2>&1"
+	else
+		PING6="ping -4 -c3 google.com > /dev/null 2>&1"
+	fi
+	if eval "$PING"; then
+		IPV4_SUGGESTION="y"
+	else
+		IPV4_SUGGESTION="n"
+	fi
 }
 
-## Get the IP Address
-get-ip
+## Decect IPV4
+detect-ipv4
 
+function test-connectivity-v4() {
+  ## Test outward facing IPV4
+  if [ "$SERVER_HOST_V4" == "" ]; then
+    SERVER_HOST_V4="$(wget -qO- -t1 -T2 ipv4.icanhazip.com)"
+    if [ "$INTERACTIVE" == "yes" ]; then
+      read -rp "System public IPV4 address is $SERVER_HOST_V4. Is that correct? [y/n]: " -e -i "$IPV4_SUGGESTION" CONFIRM
+      if [ "$CONFIRM" == "n" ]; then
+        echo "Aborted. Use environment variable SERVER_HOST_V4 to set the correct public IP address."
+      fi
+    fi
+  fi
+}
+
+## Get IPV4
+test-connectivity-v4
+
+function detect-ipv6() {
+  ## Detect IPV6
+  if type ping > /dev/null 2>&1; then
+   PING6="ping6 -c3 ipv6.google.com > /dev/null 2>&1"
+ else
+   PING6="ping -6 -c3 ipv6.google.com > /dev/null 2>&1"
+ fi
+ if eval "$PING6"; then
+   IPV6_SUGGESTION="y"
+ else
+   IPV6_SUGGESTION="n"
+ fi
+}
+
+ ## Decect IPV4
+ detect-ipv6
+
+function test-connectivity-v6() {
+  ## Test outward facing IPV6
+  if [ "$SERVER_HOST_V6" == "" ]; then
+    SERVER_HOST_V6="$(wget -qO- -t1 -T2 ipv6.icanhazip.com)"
+    if [ "$INTERACTIVE" == "yes" ]; then
+      read -rp "System public IPV6 address is $SERVER_HOST_V6. Is that correct? [y/n]: " -e -i "$IPV6_SUGGESTION" CONFIRM
+      if [ "$CONFIRM" == "n" ]; then
+        echo "Aborted. Use environment variable SERVER_HOST_V6 to set the correct public IP address."
+      fi
+    fi
+  fi
+}
+
+  ## Get IPV6
+  test-connectivity-v6
+  
   ## Determine host port
   function set-port() {
     echo "What port do you want WireGuard server to listen to?"
@@ -273,6 +327,7 @@ get-ip
   ## Client Name
   client-name
 
+  function wireguard-configurator() {
 ## WG Configurator
   WG_CONFIG="/etc/wireguard/wg0.conf"
   if [ ! -f "$WG_CONFIG" ]; then
@@ -283,6 +338,10 @@ get-ip
     PRIVATE_SUBNET_V6=${PRIVATE_SUBNET_V6:-"fd42:42:42::0/64"}
     PRIVATE_SUBNET_MASK_V6=$( echo "$PRIVATE_SUBNET_V6" | cut -d "/" -f 2 )
     GATEWAY_ADDRESS_V6="${PRIVATE_SUBNET_V6::-4}1"
+}
+
+  ## Running WireGuard COnfig
+  wireguard-configurator
 
   function install-wireguard() {
   ## Installation begins here.
@@ -335,25 +394,6 @@ get-ip
 
   ## Ip Forwarding
   ip-forwaring
-
-   ## Restart WireGuard
-  function restart-wireguard(){
-      if pgrep systemd-journal; then
-        systemctl restart wg-quick@wg0
-      else
-        service wg-quick@wg0 restart
-      fi
-  }
-
-  ## Restart unbound
-  function restart-unbound(){
-      if pgrep systemd-journal; then
-        systemctl enable unbound
-        systemctl restart unbound
-      else
-        service unbound restart
-      fi
-  }
 
   function install-firewall() {
   ## Firewall Rules
@@ -592,8 +632,20 @@ fi
         echo "nameserver 127.0.0.1" >> /etc/resolv.conf
         chattr +i /etc/resolv.conf
   }
+
   ## Install Unbound
   install-unbound
+
+  ## Restart unbound
+  function restart-unbound(){
+      if pgrep systemd-journal; then
+        systemctl enable unbound
+        systemctl restart unbound
+      else
+        service unbound restart
+      fi
+  }
+
   ## Restart Unbound
   restart-unbound
 
@@ -639,6 +691,15 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
 }
   ## Setting Up Wireguard Config
   wireguard-setconf
+  
+  ## Restart WireGuard
+  function restart-wireguard(){
+      if pgrep systemd-journal; then
+        systemctl restart wg-quick@wg0
+      else
+        service wg-quick@wg0 restart
+      fi
+  }
 
   ## WireGuard restart
   restart-wireguard
@@ -761,7 +822,7 @@ restart-wireguard
   elif [ "$DISTRO" == "Redhat" ]; then
         wg-quick down wg0
         yum remove wireguard qrencode ntpdate haveged unbound unbound-host firewalld -y
-  fi
+  else
         rm -rf /etc/wireguard
         rm -rf /etc/unbound
         rm -rf /etc/qrencode
