@@ -712,7 +712,9 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
   echo "Client Config --> "$HOME"/"$CLIENT_NAME"-wg0.conf"
 
 else
-
+  ## WireGuard Config File
+  wireguard-configurator
+  
   ## Already installed what next?
   function wireguard-next-questions() {
   echo "Looks like Wireguard is already installed."
@@ -759,7 +761,7 @@ else
 ## Running Questions Command
 wireguard-next-questions
 
-  function adding-wireguard-client() {
+function adding-wireguard-client() {
 CLIENT_PRIVKEY=$( wg genkey )
 CLIENT_PUBKEY=$( echo "$CLIENT_PRIVKEY" | wg pubkey )
 PRESHARED_KEY=$( wg genpsk )
