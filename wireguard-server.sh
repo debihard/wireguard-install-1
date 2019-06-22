@@ -239,9 +239,6 @@ function test-connectivity-v6() {
     esac
   }
 
-  ## Disable Ipv4 or Ipv6
-  disable-ipvx
-
   ## Would you like to allow connections to your LAN neighbors?
   function client-allowed-ip() {
     echo "What traffic do you want the client to forward to wireguard?"
@@ -395,6 +392,9 @@ fi
 
   ## Ip Forwarding
   ip-forwaring
+
+  ## Disable Ipv4 or Ipv6 
+  disable-ipvx
 
   function install-firewall() {
   ## Firewall Rules
@@ -712,6 +712,7 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
   echo "Client Config --> "$HOME"/"$CLIENT_NAME"-wg0.conf"
 
 else
+
   ## Already installed what next?
   function wireguard-next-questions() {
   echo "Looks like Wireguard is already installed."
@@ -834,7 +835,5 @@ restart-wireguard
         rm /etc/iptables/rules.v4
         rm /etc/firewalld/firewalld.conf
         rm /etc/default/haveged
-        ## Echo Uninstall Message
-  echo "Wireguard successfully uninstalled"
 fi
 }
