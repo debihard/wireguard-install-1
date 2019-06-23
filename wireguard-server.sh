@@ -711,8 +711,7 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
   ## Echo Client Config File
   echo "Client Config --> "$HOME"/"$CLIENT_NAME"-wg0.conf"
 
-else
-  ## WireGuard Config File
+## WireGuard Config File
   wireguard-configurator
   
   ## Already installed what next?
