@@ -34,7 +34,7 @@ function dist-check() {
 ## Check distro
 dist-check
 
-  function virt-check() {
+function virt-check() {
   ## Deny OpenVZ
   if [ "$(systemd-detect-virt)" == "openvz" ]; then
     echo "OpenVZ virtualization is not supported (yet)."
@@ -52,16 +52,16 @@ virt-check
 
 function detect-ipv4() {
   ## Detect IPV4
-  if type ping > /dev/null 2>&1; then
+if type ping > /dev/null 2>&1; then
   PING="ping -c3 google.com > /dev/null 2>&1"
-  else
+else
   PING6="ping -4 -c3 google.com > /dev/null 2>&1"
-  fi
-  if eval "$PING"; then
+fi
+if eval "$PING"; then
   IPV4_SUGGESTION="y"
-  else
+else
   IPV4_SUGGESTION="n"
-  fi
+fi
 }
 
 ## Decect IPV4
@@ -85,16 +85,16 @@ test-connectivity-v4
 
 function detect-ipv6() {
   ## Detect IPV6
-  if type ping > /dev/null 2>&1; then
+if type ping > /dev/null 2>&1; then
    PING6="ping6 -c3 ipv6.google.com > /dev/null 2>&1"
  else
    PING6="ping -6 -c3 ipv6.google.com > /dev/null 2>&1"
  fi
- if eval "$PING6"; then
+if eval "$PING6"; then
    IPV6_SUGGESTION="y"
  else
    IPV6_SUGGESTION="n"
- fi
+fi
 }
 
  ## Decect IPV4
@@ -115,6 +115,17 @@ function test-connectivity-v6() {
 
   ## Get IPV6
   test-connectivity-v6
+
+## WG Configurator
+  WG_CONFIG="/etc/wireguard/wg0.conf"
+  if [ ! -f "$WG_CONFIG" ]; then
+    INTERACTIVE=${INTERACTIVE:-yes}
+    PRIVATE_SUBNET_V4=${PRIVATE_SUBNET_V4:-"10.8.0.0/24"}
+    PRIVATE_SUBNET_MASK_V4=$( echo "$PRIVATE_SUBNET_V4" | cut -d "/" -f 2 )
+    GATEWAY_ADDRESS_V4="${PRIVATE_SUBNET_V4::-4}1"
+    PRIVATE_SUBNET_V6=${PRIVATE_SUBNET_V6:-"fd42:42:42::0/64"}
+    PRIVATE_SUBNET_MASK_V6=$( echo "$PRIVATE_SUBNET_V6" | cut -d "/" -f 2 )
+    GATEWAY_ADDRESS_V6="${PRIVATE_SUBNET_V6::-4}1"
 
   ## Determine host port
   function set-port() {
@@ -263,7 +274,7 @@ function test-connectivity-v6() {
   ## Would you like to install Unbound.
   function ask-install-unbound() {
     ## TODO: Explain to the user why in a few echo's they might want this?
-    read -rp "Do You Want To Install Unbound (y/n): " -e -i y INSTALL_UNBOUND
+      read -rp "Do You Want To Install Unbound (y/n): " -e -i y INSTALL_UNBOUND
     if [ "$INSTALL_UNBOUND" == "n" ]; then
       echo "Which DNS do you want to use with the VPN?"
       echo "   1) AdGuard (Recommended)"
@@ -323,23 +334,6 @@ function test-connectivity-v6() {
 
   ## Client Name
   client-name
-
-  function wireguard-configurator() {
-## WG Configurator
-  WG_CONFIG="/etc/wireguard/wg0.conf"
-  if [ ! -f "$WG_CONFIG" ]; then
-    INTERACTIVE=${INTERACTIVE:-yes}
-    PRIVATE_SUBNET_V4=${PRIVATE_SUBNET_V4:-"10.8.0.0/24"}
-    PRIVATE_SUBNET_MASK_V4=$( echo "$PRIVATE_SUBNET_V4" | cut -d "/" -f 2 )
-    GATEWAY_ADDRESS_V4="${PRIVATE_SUBNET_V4::-4}1"
-    PRIVATE_SUBNET_V6=${PRIVATE_SUBNET_V6:-"fd42:42:42::0/64"}
-    PRIVATE_SUBNET_MASK_V6=$( echo "$PRIVATE_SUBNET_V6" | cut -d "/" -f 2 )
-    GATEWAY_ADDRESS_V6="${PRIVATE_SUBNET_V6::-4}1"
-fi
-}
-
-  ## Running WireGuard COnfig
-  wireguard-configurator
 
   function install-wireguard() {
   ## Installation begins here.
@@ -623,7 +617,7 @@ fi
     prefetch: yes' > /etc/unbound/unbound.conf
     # Firewall Rule For Unbound
     firewall-cmd --add-service=dns --permanent
-      fi
+  fi
         # Setting Client DNS For Unbound On WireGuard
         CLIENT_DNS="10.8.0.1"
         ## Setting correct nameservers for system.
@@ -695,11 +689,11 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
 
   ## Restart WireGuard
   function restart-wireguard(){
-      if pgrep systemd-journal; then
+  if pgrep systemd-journal; then
         systemctl restart wg-quick@wg0
-      else
+  else
         service wg-quick@wg0 restart
-      fi
+  fi
   }
 
   ## WireGuard restart
@@ -711,9 +705,8 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
   ## Echo Client Config File
   echo "Client Config --> "$HOME"/"$CLIENT_NAME"-wg0.conf"
 
-## WireGuard Config File
-  wireguard-configurator
-  
+  else
+
   ## Already installed what next?
   function wireguard-next-questions() {
   echo "Looks like Wireguard is already installed."
@@ -838,3 +831,4 @@ restart-wireguard
         rm /etc/default/haveged
 fi
 }
+fi
