@@ -689,12 +689,12 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
 
   ## Restart WireGuard
   function restart-wireguard(){
-  if pgrep systemd-journal; then
-        systemctl restart wg-quick@wg0
+if pgrep systemd-journal; then
+    systemctl restart wg-quick@wg0
   else
-        service wg-quick@wg0 restart
-  fi
-  }
+    service wg-quick@wg0 restart
+fi
+}
 
   ## WireGuard restart
   restart-wireguard
@@ -721,7 +721,7 @@ qrencode -t ansiutf8 -l L < "$HOME"/"$CLIENT_NAME"-wg0.conf
   case $WIREGUARD_OPTIONS in
     1)
     echo "Tell me a new name for the client config file. Use one word only, no special characters. (No Spaces)"
-    read -rp "New client name: " -e NEW_CLIENT_NAME
+      read -rp "New client name: " -e NEW_CLIENT_NAME
     adding-wireguard-client
     ;;
     2)
